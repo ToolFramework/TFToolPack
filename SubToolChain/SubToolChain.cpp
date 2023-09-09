@@ -50,7 +50,7 @@ bool SubToolChain::Finalise(){
 
   bool ret=true;
   
-  if(m_subtoolchain->Finalise()) ret=false;
+  if(!m_subtoolchain->Finalise()) ret=false;
   delete m_subtoolchain;
   m_subtoolchain=0;
 
