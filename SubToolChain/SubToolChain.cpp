@@ -31,7 +31,7 @@ bool SubToolChain::Execute(){
 
   int n_repeats = 1;
   
-  if(!repeats_var.empty() && !m_data->CStore.Get(repeats_var, n_repeats)){
+  if(!m_repeats_var.empty() && !m_data->CStore.Get(m_repeats_var, n_repeats)){
     throw std::runtime_error("SubToolChain:Execute : repeat flag set, but no variable in m_data->CStore matches the name "+repeats_var+"\n");
   }  
 
