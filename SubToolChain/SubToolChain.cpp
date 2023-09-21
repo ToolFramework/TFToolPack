@@ -23,19 +23,18 @@ bool SubToolChain::Initialise(std::string configfile, DataModel &data){
 
   if(!m_subtoolchain->LoadTools(tools_conf)) return false;
   if(!m_variables.Get("repeats_var", m_repeats_var)) m_repeats_var="";
+  m_repeates=1;
   return m_subtoolchain->Initialise();
 }
 
 
 bool SubToolChain::Execute(){
-
-  int n_repeats = 1;
-  
-  if(!m_repeats_var.empty() && !m_data->CStore.Get(m_repeats_var, n_repeats)){
+ 
+  if(!m_repeats_var.empty() && !m_data->CStore.Get(m_repeats_var, m_repeats)){
     throw std::runtime_error("SubToolChain:Execute : repeat flag set, but no variable in m_data->CStore matches the name "+repeats_var+"\n");
   }  
 
-  return m_subtoolchain->Execute(n_repeats);
+  return m_subtoolchain->Execute(m_repeats);
 }
 
 
