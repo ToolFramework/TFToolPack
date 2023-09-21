@@ -31,7 +31,7 @@ bool SubToolChain::Initialise(std::string configfile, DataModel &data){
 bool SubToolChain::Execute(){
  
   if(!m_repeats_var.empty() && !m_data->CStore.Get(m_repeats_var, m_repeats)){
-    throw std::runtime_error("SubToolChain:Execute : repeat flag set, but no variable in m_data->CStore matches the name "+repeats_var+"\n");
+    throw std::runtime_error("SubToolChain:Execute : repeat flag set, but no variable in m_data->CStore matches the name "+m_repeats_var+"\n");
   }  
 
   return m_subtoolchain->Execute(m_repeats);
