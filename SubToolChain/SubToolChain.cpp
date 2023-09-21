@@ -22,7 +22,7 @@ bool SubToolChain::Initialise(std::string configfile, DataModel &data){
   m_subtoolchain=new ToolChain(m_verbose, errorlevel, true, false, "", false, m_data);
 
   if(!m_subtoolchain->LoadTools(tools_conf)) return false;
-  m_variables.Get("repeats_var", repeats_var);
+  if(!m_variables.Get("repeats_var", m_repeats_var)) m_repeats_var="";
   return m_subtoolchain->Initialise();
 }
 
