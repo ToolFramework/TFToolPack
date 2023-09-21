@@ -32,7 +32,8 @@ class SubToolChain: public Tool {
 
   ToolChain* m_subtoolchain;
 
-
+  std::string m_repeats_var;
+  int m_repeats;
 
 };
 
