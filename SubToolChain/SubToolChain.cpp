@@ -3,6 +3,10 @@
 
 SubToolChain::SubToolChain():Tool(){}
 
+/*
+  Unlike Tools, the return type for the Initialise(), Execute() and Finalise() methods of ToolChains are int, NOT bool.
+  For that reason, we need to compare return value to zero to judge that the subtoolchain functioned properly.
+*/
 
 bool SubToolChain::Initialise(std::string configfile, DataModel &data){
 
@@ -24,7 +28,7 @@ bool SubToolChain::Initialise(std::string configfile, DataModel &data){
   if(!m_subtoolchain->LoadTools(tools_conf)) return false;
   if(!m_variables.Get("repeats_var", m_repeats_var)) m_repeats_var="";
   m_repeats=1;
-  return m_subtoolchain->Initialise();
+  return (m_subtoolchain->Initialise() == 0);
 }
 
 
@@ -34,16 +38,16 @@ bool SubToolChain::Execute(){
     throw std::runtime_error("SubToolChain:Execute : repeat flag set, but no variable in m_data->CStore matches the name "+m_repeats_var+"\n");
   }  
 
-  return m_subtoolchain->Execute(m_repeats);
+  return (m_subtoolchain->Execute(m_repeats) == 0);
 }
 
 
 bool SubToolChain::Finalise(){
   
-  bool ret = m_subtoolchain->Finalise();
+  int ret = m_subtoolchain->Finalise();
   delete m_subtoolchain;
   m_subtoolchain=0;
 
-  return ret;
+  return (ret == 0);
 }
 
