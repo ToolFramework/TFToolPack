@@ -5,8 +5,10 @@
 #include <iostream>
 
 #include "Tool.h"
+#include "DataModel.h"
+#include "ToolChain.h"
 
-class ToolChain;
+//class ToolChain;
 
 /**
  * \class SubToolChain
