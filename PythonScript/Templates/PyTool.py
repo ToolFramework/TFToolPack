@@ -4,9 +4,6 @@ from Tool import *
 
 class TestPython(Tool):
     
-    # declare member variables here
-    demovariable = 'TestString'
-    
     def Initialise(self):
         self.m_log.Log(__file__+" Initialising", self.v_debug, self.m_verbosity)
         self.m_variables.Print()

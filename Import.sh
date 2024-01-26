@@ -38,13 +38,20 @@ then
 	
 	fi
 else
-	num=0
-	dialog --checklist "Select Tools to import with <spacebar>, Enter for OK and ESC for Cancel:" 0 0 0 \
-	`for Tool in \`ls -d */|sed s:/::\`
-	do
-		echo "$Tool $num off "
-		num=$(expr 1 + $num)
-	done` 2> tmptools
+	echo "" > tmptools
+	if [ $# -gt 0 ]; then
+		for i in `seq 1 $#`; do
+			echo ${!i} >> tmptools
+		done
+	else
+		num=0
+		dialog --checklist "Select Tools to import with <spacebar>, Enter for OK and ESC for Cancel:" 0 0 0 \
+		`for Tool in \`ls -d */|sed s:/::\`
+		do
+			echo "$Tool $num off "
+			num=$(expr 1 + $num)
+		done` 2> tmptools
+	fi
 	
 	if [ $? -eq 0 ]
 	then
