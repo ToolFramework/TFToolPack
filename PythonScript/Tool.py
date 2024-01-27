@@ -7,13 +7,12 @@ import ctypes
 std = cppyy.gbl.std
 # pull in classes from the DataModel
 cppyy.add_include_path('include')
-cppyy.add_include_path('ToolDAQ/boost_1_66_0/install/include')
-cppyy.add_include_path('ToolDAQ/zeromq-4.0.7/include')
+cppyy.add_include_path('Dependencies/ToolFrameworkCore/include')
 cppyy.include('DataModel.h')
 cppyy.load_library('libDataModel.so')
 from cppyy.gbl import DataModel
-from cppyy.gbl import Store
-from cppyy.gbl import Logging
+from cppyy.gbl.ToolFramework import Store
+from cppyy.gbl.ToolFramework import Logging
 # import infrastructure for declaring an abstract base class
 from abc import ABC, abstractmethod
 

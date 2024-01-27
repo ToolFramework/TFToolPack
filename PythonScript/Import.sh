@@ -39,11 +39,12 @@ LIBFLAGS=$(python3-config --ldflags --embed &>/dev/null && echo "python3-config 
 LIBLINE='MyToolsLib += `'"${LIBFLAGS}"'`'
 awk -i inplace -v "var=${LIBLINE}" '{print} /MyToolsLib/ && !x {print var; x=1}' ${ToolAppPath}/Makefile
 
-# add the path to cppyy module to the Setup.sh
+# add the path to cppyy module and the base python Tool class to the Setup.sh
 PACKAGEPATH=$(python3 -m pip show cppyy_backend | grep 'Location' | cut -d' ' -f 2)
-cat << EOF >> ${TOOLFRAMEWORKDIR}/Setup.sh
+cat << EOF >> ${ToolAppPath}/Setup.sh
 
 export PYTHONPATH=${PACKAGEPATH}:\$PYTHONPATH
+export PYTHONPATH=${ToolAppPath}/UserTools/ImportedTools/TFToolPack/PythonScript:${PYTHONPATH}
 
 EOF
 

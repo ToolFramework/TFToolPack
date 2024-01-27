@@ -6,6 +6,7 @@
 #include <Python.h>
 
 #include "Tool.h"
+#include "DataModel.h"
 
 class PythonScript: public Tool {
 

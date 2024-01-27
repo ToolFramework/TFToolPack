@@ -2,6 +2,58 @@
 #set -x
 #set -e
 
+# a function to check for presence of cppyy. New ROOT versions come with it.
+# XXX for some reason this doesn't like the use of tab for whitespace!!! XXX
+checkcppyy(){
+    # a quick test, also trigger rebuilding of the pch
+    echo "the following test should print 0·1·2·3·4·5·6·7·8·9¶"
+    # especially no indents here or python complains
+    PYCMDS="
+import cppyy
+from cppyy.gbl.std import vector
+v = vector[int](range(10))
+for m in v: print(m, end=' ')
+"
+    RESULT=$(echo "${PYCMDS}" | python3)
+    
+    # we need to do it twice as the first time it prints out a message about recompiling the header
+    RESULT=$(echo "${PYCMDS}" | python3)
+    
+    # trim whitespace
+    RESULT="$(echo -n ${RESULT} | xargs echo -n)"
+    echo $RESULT | sed 's/ /·/g;s/\t/￫/g;s/\r/§/g;s/$/¶/g'  # check whitespace
+    if [ "$RESULT" != "0 1 2 3 4 5 6 7 8 9" ]; then
+        echo "Test Failed! Check your installation of python3 and cppyy!"
+        return 1
+    else
+        echo "Test Passed"
+        return 0
+    fi
+}
+
+echo "checking for pre-existing presence of cppyy"
+checkcppyy
+if [ $? -eq 0 ]; then
+	# if we already have it, we have no further actions to take in the Install script
+	echo "cppyy already installed. PyTool installation completed successfully"
+	exit 0
+fi
+
+# otherwise we need to install it
+echo "failed to find existing (working) cppyy install; install one now?"
+select result in Yes No; do
+	if [ "$result" == "Yes" ] || [ "$result" == "No" ]; then
+		if [ "$result" == "No" ]; then
+			echo "terminating.";
+			exit 1;
+		else
+			break;
+		fi
+	else
+		echo "please enter 1 or 2";
+	fi
+done
+
 CURDIR=${PWD}  # in case we need to return to it. unused.
 cd "$( dirname "${BASH_SOURCE[0]}" )"
 
@@ -108,7 +160,8 @@ else
 				else
 					echo "Installing dependencies..."
 					if [ ${REDHATLIKE} -eq 0 ]; then
-						yum install -y "${NEEDDEPS}"
+						# somehow 'yum install -y ${NEEDDEPS} doesnt work in a script
+						echo "${NEEDDEPS}" | xargs yum install -y
 						INSTALLOK=$?
 					elif [ ${DEBIANLIKE} -eq 0 ]; then
 						apt-get install -y "${NEEDDEPS}"
@@ -134,42 +187,7 @@ else
 	fi
 fi
 
-# a function to check for presence of cppyy. New ROOT versions come with it.
-# XXX for some reason this doesn't like the use of tab for whitespace!!! XXX
-checkcppyy(){
-    # a quick test, also trigger rebuilding of the pch
-    echo "the following test should print 0·1·2·3·4·5·6·7·8·9¶"
-    # especially no indents here or python complains
-    PYCMDS="
-import cppyy
-from cppyy.gbl.std import vector
-v = vector[int](range(10))
-for m in v: print(m, end=' ')
-"
-    RESULT=$(echo "${PYCMDS}" | python3)
-    
-    # we need to do it twice as the first time it prints out a message about recompiling the header
-    RESULT=$(echo "${PYCMDS}" | python3)
-    
-    # trim whitespace
-    RESULT="$(echo -n ${RESULT} | xargs echo -n)"
-    echo $RESULT | sed 's/ /·/g;s/\t/￫/g;s/\r/§/g;s/$/¶/g'  # check whitespace
-    if [ "$RESULT" != "0 1 2 3 4 5 6 7 8 9" ]; then
-        echo "Test Failed! Check your installation of python3 and cppyy!"
-        return 1
-    else
-        echo "Test Passed"
-        return 0
-    fi
-}
 
-echo "checking for pre-existing presence of cppyy"
-checkcppyy
-if [ $? -eq 0 ]; then
-	# if we already have it, we have no further actions to take.
-	echo "cppyy already installed. PyTool installation completed successfully"
-	exit 0
-fi
 
 # XXX TODO replace all this user-directory nonsense with
 # --prefix, --root or --target
@@ -204,8 +222,12 @@ if [ ${GOTSUDO} -eq 1 ] && [ "$(whoami)" != "root" ]; then
 	SUDOCMD="sudo "
 fi
 
+# only offer to install to user home dir if user is not root
+if [ "$(whoami)" != "root" ]; then
+	OPTIONS="${THISUSER}"
+fi
+
 # seems like we also need to be root to pip install system-wide
-OPTIONS="${THISUSER}"
 if [ ${GOTSUDO} -eq 0 ] || [ "$(whoami)" == "root" ]; then
 	OPTIONS="System ${OPTIONS}"
 fi
@@ -289,25 +311,8 @@ $SUDOFLAGS python3 -m pip install $PIPFLAGS --upgrade pip
 # we'll also need wheel, or the CPyCppyy install will fail
 $SUDOFLAGS python3 -m pip install $PIPFLAGS wheel
 
-# otherwise we need to install it
-echo "failed to find existing (working) cppyy install; install one now?"
-select result in Yes No; do
-	if [ "$result" == "Yes" ] || [ "$result" == "No" ]; then
-		if [ "$result" == "No" ]; then
-			echo "terminating.";
-			exit 1;
-		else
-			break;
-		fi
-	else
-		echo "please enter 1 or 2";
-	fi
-done
-
-# if we got here user said yes: proceed with cppyy installation
-
 # setup installation environment
-export STDCXX=11
+#export STDCXX=11  # https://github.com/root-project/root/issues/8281
 #export EXTRA_CLING_ARGS='-nocudainc'
 export CLING_REBUID_PCH=1
 export PATH=/home/${THISUSER}/.local/bin:$PATH
