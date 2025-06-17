@@ -21,10 +21,15 @@ bool SubToolChain::Initialise(std::string configfile, DataModel &data){
 
   m_subtoolchain=new ToolChain(m_verbose, errorlevel, true, false, "", false, m_data);
 
+  Log(m_unique_name+" loading tools from file "+tools_conf,v_debug,m_verbose);
   if(!m_subtoolchain->LoadTools(tools_conf)) return false;
   if(!m_variables.Get("repeats_var", m_repeats_var)) m_repeats_var="";
   m_repeats=1;
-  return m_subtoolchain->Initialise();
+  Log(m_unique_name+" initialising subtoolchain ",v_debug,m_verbose);
+  int get_ok = m_subtoolchain->Initialise();
+  Log(m_unique_name+" subtoolchain initialised with return val "+std::to_string(get_ok),v_debug,m_verbose);
+  // expect a value of 0 for success
+  return (get_ok==0);
 }
 
 
@@ -34,7 +39,7 @@ bool SubToolChain::Execute(){
     throw std::runtime_error("SubToolChain:Execute : repeat flag set, but no variable in m_data->CStore matches the name "+m_repeats_var+"\n");
   }  
 
-  return m_subtoolchain->Execute(m_repeats);
+  return (m_subtoolchain->Execute(m_repeats)==0);
 }
 
 
@@ -44,6 +49,6 @@ bool SubToolChain::Finalise(){
   delete m_subtoolchain;
   m_subtoolchain=0;
 
-  return ret;
+  return (ret==0);
 }
 
